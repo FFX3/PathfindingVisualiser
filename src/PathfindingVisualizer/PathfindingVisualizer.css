@@ -1,0 +1,24 @@
+.grid {
+  border-right: 1px;
+  border-bottom: 1px;
+  border-top:0px;
+  border-left:0px;
+  border-style: solid;
+}
+
+.grid > div {
+  border-width: 0px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 20px;
+}
+
+.node {
+  flex-grow: 1;
+  border-top:1px;
+  border-left:1px;
+  border-right: 0px;
+  border-bottom: 0px;
+  border-style: solid;
+}
