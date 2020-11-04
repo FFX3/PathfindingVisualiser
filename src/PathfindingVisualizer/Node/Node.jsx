@@ -16,16 +16,23 @@ export default class Node extends Component {
     this.styleNode();
   }
 
+  // styleNode(){
+  //   switch(this.state.type){
+  //     case 'start':
+  //       return { backgroundColor: 'red' };
+  //     case 'end':
+  //       return {}
+  //     case 'wall':
+  //       return {}
+  //     default:
+  //       return {};
+  //   }
+  // }
   styleNode(){
-    switch(this.state.type){
-      case 'start':
-        return { backgroundColor: 'red' };
-      case 'end':
-        return {}
-      case 'wall':
-        return {}
-      default:
-        return {};
+    if(this.props.style !== undefined){
+      return this.props.style;
+    }else{
+      return {};
     }
   }
 

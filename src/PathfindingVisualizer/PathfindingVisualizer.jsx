@@ -22,6 +22,17 @@ export default class PathfindingVisualizer extends Component {
     switch(type){
       case 'start':
         nodes.forEach(arr=>arr.forEach(node=>console.log(node.type[0])))
+
+        let x; let y;
+        for(x=0; x<nodes.length; x++){
+          for(y=0; y<nodes[x].length; y++){
+            const index = nodes[x][y].type.indexOf('start')
+            if(index !== -1){
+              nodes[x][y].type.splice(index, 1);
+            }
+          }
+        }
+
         newNodeProps.type = ['start']
         break;
       case 'end':
@@ -61,6 +72,19 @@ export default class PathfindingVisualizer extends Component {
     this.setState({nodes});
   }
 
+  styleNode(x, y){
+    const type = this.state.nodes[x][y].type;
+    let style;
+      if(type.includes('start')) { 
+        style ={
+          ...style,
+          backgroundColor: 'red', 
+        }
+      };
+      
+    return style
+  }
+
   render() {
     const {nodes} = this.state;
     return (
@@ -74,7 +98,8 @@ export default class PathfindingVisualizer extends Component {
 
                 row={node.row}
                 col={node.col}
-                type={node.type}
+                //type={node.type}
+                style={this.styleNode(node.row, node.col)}
                 key={node.key}
               />)}
             </div>
