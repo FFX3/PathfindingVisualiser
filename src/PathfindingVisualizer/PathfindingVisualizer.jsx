@@ -7,14 +7,45 @@ import './PathfindingVisualizer.css';
 let rows = 15;
 let col = 25;
 
-
 export default class PathfindingVisualizer extends Component {
   constructor(props) {
     super(props);
     this.state = {
       nodes: [],
     };
-    console.log('hello')
+    this.nodeTypeHandler = this.nodeTypeHandler.bind(this)
+  }
+
+  nodeTypeHandler(type, position){
+    let newNodeProps = {}
+    switch(type){
+      case 'start':
+        newNodeProps.isStart = true;
+        newNodeProps.isEnd = false;
+        newNodeProps.isWall = false;
+        break;
+      case 'end':
+        newNodeProps.isStart = false;
+        newNodeProps.isEnd = true;
+        newNodeProps.isWall = false;
+        break;
+      case 'wall':
+        newNodeProps.isStart = false;
+        newNodeProps.isEnd = false;
+        newNodeProps.isWall = true;
+        break;
+      default:
+        console.log('Trying to change node to invalid node type!')
+        return
+    }
+    let nodes = this.state.nodes;
+    let node = nodes[position.x][position.y];
+    node = {
+      ...node,
+      ...newNodeProps,
+    }
+    nodes[position.x][position.y] = node;
+    this.setState({nodes})
   }
 
   componentDidMount() {
@@ -22,7 +53,15 @@ export default class PathfindingVisualizer extends Component {
     for(let rowCount=0; rowCount < rows; rowCount++) {
       let currentRow = [];
       for (let colCount=0; colCount < col; colCount++) {
-        currentRow.push([]);
+        currentRow.push({
+          //this will the the nodes properties
+          row:rowCount,
+          col:colCount,
+          isStart:false,
+          isEnd:false,
+          isWall:false,
+          key:`${rowCount}_${colCount}`
+        });
       }
       nodes.push(currentRow);
     }
@@ -31,13 +70,22 @@ export default class PathfindingVisualizer extends Component {
 
   render() {
     const {nodes} = this.state;
-    console.log(nodes);
     return (
       <div className="grid">
         {nodes.map((row, rowIndex) => {
           return (
             <div>
-              {row.map((node, nodeIndex) => <Node></Node>)}
+              {row.map((node, nodeIndex) => 
+              <Node
+                nodeTypeHandler={this.nodeTypeHandler}  
+
+                row={node.row}
+                col={node.col}
+                isStart={node.isStart}
+                isEnd={node.isEnd}
+                isWall={node.isWall}
+                key={node.key}
+              />)}
             </div>
           )
         })}
