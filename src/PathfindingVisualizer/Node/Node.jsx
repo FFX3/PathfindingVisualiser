@@ -6,53 +6,37 @@ export default class Node extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      col:props.col,
-      row:props.row,
-      isStart:props.isStart,
-      isEnd:props.isEnd,
-      isWall:props.isWall,
+      type: props.type,
     };
   }
 
   changeNodeType(){
     this.props.nodeTypeHandler('start', {x:this.props.row, y:this.props.col})
-    // let type = 'start'
-    // let row = this.props.row;
-    // let col = this.props.col;
+    this.setState({type: 'start',})
+    this.styleNode();
+  }
 
-    // console.log(type)
-    // switch(type){
-    //   case 'start':
-    //     this.setState({
-    //       isStart:true,
-    //       isEnd:false,
-    //       isWall:false,
-    //     })
-    //     break;
-    //   case 'end':
-    //     this.setState({
-    //       isStart:true,
-    //       isEnd:false,
-    //       isWall:false,
-    //     })
-    //     break;
-    //   case 'wall':
-    //     this.setState({
-    //       isStart:true,
-    //       isEnd:false,
-    //       isWall:false,
-    //     })
-    //     break;
-    //   default:
-    //     console.log('Trying to change node to invalid node type!')
-  
-    // }
-
+  styleNode(){
+    switch(this.state.type){
+      case 'start':
+        return { backgroundColor: 'red' };
+      case 'end':
+        return {}
+      case 'wall':
+        return {}
+      default:
+        return {};
+    }
   }
 
   render() {
     return (
-      <div id={`${this.props.row}_${this.props.col}`} onClick={() => this.changeNodeType()} className="node"></div>
+      <div 
+        id={`${this.props.row}_${this.props.col}`}
+        onClick={() => this.changeNodeType()}
+        className="node"
+        style={this.styleNode()}
+      ></div>
     )
   }
 }

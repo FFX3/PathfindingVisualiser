@@ -18,27 +18,22 @@ export default class PathfindingVisualizer extends Component {
 
   nodeTypeHandler(type, position){
     let newNodeProps = {}
+    let nodes = this.state.nodes;
     switch(type){
       case 'start':
-        newNodeProps.isStart = true;
-        newNodeProps.isEnd = false;
-        newNodeProps.isWall = false;
+        nodes.forEach(arr=>arr.forEach(node=>console.log(node.type[0])))
+        newNodeProps.type = ['start']
         break;
       case 'end':
-        newNodeProps.isStart = false;
-        newNodeProps.isEnd = true;
-        newNodeProps.isWall = false;
+        newNodeProps.type = ['end']
         break;
       case 'wall':
-        newNodeProps.isStart = false;
-        newNodeProps.isEnd = false;
-        newNodeProps.isWall = true;
+        newNodeProps.type = ['wall']
         break;
       default:
         console.log('Trying to change node to invalid node type!')
         return
     }
-    let nodes = this.state.nodes;
     let node = nodes[position.x][position.y];
     node = {
       ...node,
@@ -57,9 +52,7 @@ export default class PathfindingVisualizer extends Component {
           //this will the the nodes properties
           row:rowCount,
           col:colCount,
-          isStart:false,
-          isEnd:false,
-          isWall:false,
+          type:[],
           key:`${rowCount}_${colCount}`
         });
       }
@@ -77,13 +70,11 @@ export default class PathfindingVisualizer extends Component {
             <div>
               {row.map((node, nodeIndex) => 
               <Node
-                nodeTypeHandler={this.nodeTypeHandler}  
+                nodeTypeHandler={this.nodeTypeHandler}
 
                 row={node.row}
                 col={node.col}
-                isStart={node.isStart}
-                isEnd={node.isEnd}
-                isWall={node.isWall}
+                type={node.type}
                 key={node.key}
               />)}
             </div>
