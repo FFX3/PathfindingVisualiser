@@ -13,36 +13,43 @@ export default class PathfindingVisualizer extends Component {
     super(props);
     this.state = {
       nodes: [],
+      startPosition: {},
+      endPosition: {},
     };
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this)
   }
 
 
-  //this system should be replaced with something more efficient
-  //I could simply decide the styling from here based on the node position on the grid instead of iterating throught all the nodes
-  //I'll come back to this once I got everything else working.
   nodeTypeHandler(type, position){
     let newNodeProps = {}
     let nodes = this.state.nodes;
     switch(type){
       case 'start':
       case 'end':
-        nodes.forEach(arr=>arr.forEach(node=>console.log(node.type[0])))
 
-        let x; let y;
-        for(x=0; x<nodes.length; x++){
-          for(y=0; y<nodes[x].length; y++){
-            const index = nodes[x][y].type.indexOf(type);
-            if(index !== -1){
-              nodes[x][y].type.splice(index, 1);
+        if(type === 'start'){
+          this.setState({
+            startPosition: {
+              x: position.x,
+              y: position.y,
             }
-          }
+          });
+        }else{
+          this.setState({
+            endPosition: {
+              x: position.x,
+              y: position.y,
+            }
+          });
         }
-
-        newNodeProps.type = [type]
+        newNodeProps.type = [];
+        
         break;
       case 'wall':
-        newNodeProps.type = ['wall']
+        newNodeProps.type = [type];
+        break;
+      case 'erase':
+        newNodeProps.type = [];
         break;
       default:
         console.log('Trying to change node to invalid node type!')
@@ -67,6 +74,7 @@ export default class PathfindingVisualizer extends Component {
           row:rowCount,
           col:colCount,
           type:[],
+          explored:false,
           key:`${rowCount}_${colCount}`
         });
       }
@@ -75,23 +83,52 @@ export default class PathfindingVisualizer extends Component {
     this.setState({nodes});
   }
 
+  //this logic should probably be in the Node components
   styleNode(x, y){
-    const type = this.state.nodes[x][y].type;
     let style;
-      if(type.includes('start')) { 
+
+    if(x === this.state.startPosition.x && y === this.state.startPosition.y) {
+      style = {
+        ...style,
+        backgroundColor: 'red',
+      }
+    }else if(x === this.state.endPosition.x && y === this.state.endPosition.y){
+      style = {
+        ...style,
+        backgroundColor: 'blue',
+      }
+    }else{
+
+      const type = this.state.nodes[x][y].type;
+      // if(type.includes('start')) { 
+      //   style = {
+      //     ...style,
+      //     backgroundColor: 'red', 
+      //   }
+      // };
+      // if(type.includes('end')) {
+      //   style = {
+      //     ...style,
+      //     backgroundColor: 'blue',
+      //   }
+      // };
+      if(type.includes('wall')){
         style = {
           ...style,
-          backgroundColor: 'red', 
-        }
-      };
-      if(type.includes('end')) {
-        style = {
-          ...style,
-          backgroundColor: 'blue',
+          backgroundColor: 'grey',
         }
       }
-      
+    }
     return style
+  }
+
+  //this function referers to this object's state to determine which type each node should have
+  setUniqueNodeType(x, y){
+    if(x === this.state.startPosition.x && y === this.state.startPosition.y) {
+      return 'start';
+    }else if(x === this.state.endPosition.x && y === this.state.endPosition.y){
+      return 'end';
+    }
   }
 
   render() {
@@ -110,7 +147,9 @@ export default class PathfindingVisualizer extends Component {
                   row={node.row}
                   col={node.col}
                   style={this.styleNode(node.row, node.col)}
+                  explored={node.explored}
                   key={node.key}
+                  type={this.setUniqueNodeType(node.row, node.col)}
                 />)}
               </div>
             )

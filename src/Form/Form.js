@@ -11,6 +11,8 @@ const Form = ({wandManager}) => {
       <select onChange={selectHandler}>
         <option value="start">Start</option>
         <option value="end">End</option>
+        <option value="wall">Wall</option>
+        <option value="erase">Erase</option>
       </select>
     </form>
   )
