@@ -3,12 +3,17 @@ import Node from './Node/Node';
 
 import './PathfindingVisualizer.css'
 
+//algorithms
+import findPath from './algorithms/a*';
+
 //variables
 let rows = 15;
 let col = 25;
 
+
 export default class PathfindingVisualizer extends Component {
   
+  //below this is all the stuff that creates the grid
   constructor(props) {
     super(props);
     this.state = {
@@ -19,6 +24,23 @@ export default class PathfindingVisualizer extends Component {
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this)
   }
 
+  //path finding implementation
+  startPathFinding(){
+    const start = this.state.startPosition;
+    const end = this.state.endPosition;
+    //creates a grid of bools true for walkable terrain and false for the walls
+    const grid = this.state.nodes.map((arr)=>{
+      return  arr.map((node)=> {
+        if(!node.type.includes('wall')){
+          return true;
+        }else{
+          return false;
+        }
+      })
+    })
+    console.log(grid);
+    findPath(start, end, grid);
+  }
 
   nodeTypeHandler(type, position){
     let newNodeProps = {}
@@ -43,7 +65,7 @@ export default class PathfindingVisualizer extends Component {
           });
         }
         newNodeProps.type = [];
-        
+
         break;
       case 'wall':
         newNodeProps.type = [type];
@@ -70,7 +92,7 @@ export default class PathfindingVisualizer extends Component {
       let currentRow = [];
       for (let colCount=0; colCount < col; colCount++) {
         currentRow.push({
-          //this will the the nodes properties
+          //this will be the nodes properties
           row:rowCount,
           col:colCount,
           type:[],
@@ -98,20 +120,7 @@ export default class PathfindingVisualizer extends Component {
         backgroundColor: 'blue',
       }
     }else{
-
       const type = this.state.nodes[x][y].type;
-      // if(type.includes('start')) { 
-      //   style = {
-      //     ...style,
-      //     backgroundColor: 'red', 
-      //   }
-      // };
-      // if(type.includes('end')) {
-      //   style = {
-      //     ...style,
-      //     backgroundColor: 'blue',
-      //   }
-      // };
       if(type.includes('wall')){
         style = {
           ...style,
