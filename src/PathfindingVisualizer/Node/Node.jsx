@@ -11,23 +11,11 @@ export default class Node extends Component {
   }
 
   changeNodeType(){
-    this.props.nodeTypeHandler('start', {x:this.props.row, y:this.props.col})
-    this.setState({type: 'start',})
+    this.props.nodeTypeHandler(this.props.wandType, {x:this.props.row, y:this.props.col})
+    this.setState({type: this.props.wandType,})
     this.styleNode();
   }
 
-  // styleNode(){
-  //   switch(this.state.type){
-  //     case 'start':
-  //       return { backgroundColor: 'red' };
-  //     case 'end':
-  //       return {}
-  //     case 'wall':
-  //       return {}
-  //     default:
-  //       return {};
-  //   }
-  // }
   styleNode(){
     if(this.props.style !== undefined){
       return this.props.style;
