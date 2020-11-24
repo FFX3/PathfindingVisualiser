@@ -25,6 +25,8 @@ const dijkstra = (start, end, grid, nodesList, init) => {
     nodes.explored = []
     nodes.queue = []
     nodes.queue.push(new PathNode(start.x, start.y, null, 0));
+    nodes.pathFound = false;
+    nodes.pathHead = null; //the path will be returned as a linked list
   }
 
   nodes.currentNode = nodes.queue.pop();
@@ -48,6 +50,7 @@ const dijkstra = (start, end, grid, nodesList, init) => {
       }
     }
   });
+
   //step 2 initiate the new nodes and order them based on gCost in the queue
   nodes.currentNode.data.neighbours.forEach(position=>{
     let newNode = new PathNode(position.x, position.y, nodes.currentNode, nodes.nodeListGCost[position.y][position.x]);
@@ -59,15 +62,25 @@ const dijkstra = (start, end, grid, nodesList, init) => {
         if(newNode.data.gCost < nodes.queue[index].gCost){
           //add this node right after it
           nodes.queue.splice(index+1, 0, newNode);
-          console.log('node added')
         }else if(index === 0){
           //this is this node is has the highest gCost and should be the first in the array
           nodes.queue.unshift(newNode);
-          console.log('node added')
         }
       }
     }
   })
+
+  //step 3 check if any of the nodes are the end node, that would mean we're done and can return the end node as the pathHead
+  nodes.queue.forEach(node=>{
+    console.log(node.data.position);
+    console.log(end);
+    if(node.data.position.x === end.x && node.data.position.y === end.y){
+      nodes.pathHead = node;
+      nodes.pathFound = true;
+    }
+  })
+
+
 
   console.log(nodes);
 
