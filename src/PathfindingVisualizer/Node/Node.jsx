@@ -11,7 +11,7 @@ export default class Node extends Component {
   }
 
   changeNodeType(){
-    this.props.nodeTypeHandler(this.props.wandType, {x:this.props.row, y:this.props.col})
+    this.props.nodeTypeHandler(this.props.wandType, {x:this.props.col, y:this.props.row})
     this.setState({type: this.props.wandType,})
     this.styleNode();
   }

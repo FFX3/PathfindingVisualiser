@@ -1,5 +1,5 @@
-const findPath = (start, end, grid) => {
-
+const aStar = (start, end, grid) => {
+  
 }
 
-export default findPath;
+export default aStar;

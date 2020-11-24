@@ -4,7 +4,8 @@ import Node from './Node/Node';
 import './PathfindingVisualizer.css'
 
 //algorithms
-import findPath from './algorithms/a*';
+import aStar from './algorithms/a*';
+import dijkstra from './algorithms/dijkstra';
 
 //variables
 let rows = 15;
@@ -21,7 +22,8 @@ export default class PathfindingVisualizer extends Component {
       startPosition: {},
       endPosition: {},
     };
-    this.nodeTypeHandler = this.nodeTypeHandler.bind(this)
+    this.nodeTypeHandler = this.nodeTypeHandler.bind(this);
+    this.startPathFinding = this.startPathFinding.bind(this);
   }
 
   //path finding implementation
@@ -38,8 +40,7 @@ export default class PathfindingVisualizer extends Component {
         }
       })
     })
-    console.log(grid);
-    findPath(start, end, grid);
+    dijkstra(start, end, grid, {}, true);
   }
 
   nodeTypeHandler(type, position){
@@ -77,12 +78,12 @@ export default class PathfindingVisualizer extends Component {
         console.log('Trying to change node to invalid node type!')
         return
     }
-    let node = nodes[position.x][position.y];
+    let node = nodes[position.y][position.x];
     node = {
       ...node,
       ...newNodeProps,
     }
-    nodes[position.x][position.y] = node;
+    nodes[position.y][position.x] = node;
     this.setState({nodes})
   }
 
@@ -97,7 +98,8 @@ export default class PathfindingVisualizer extends Component {
           col:colCount,
           type:[],
           explored:false,
-          key:`${rowCount}_${colCount}`
+          key:`${rowCount}_${colCount}`,
+          isPath: false,
         });
       }
       nodes.push(currentRow);
@@ -120,11 +122,17 @@ export default class PathfindingVisualizer extends Component {
         backgroundColor: 'blue',
       }
     }else{
-      const type = this.state.nodes[x][y].type;
+      const type = this.state.nodes[y][x].type;
       if(type.includes('wall')){
         style = {
           ...style,
           backgroundColor: 'grey',
+        }
+      }
+      if(type.includes('explored')){
+        style = {
+          ...style,
+          backgroundColor: '#ADD8E6'
         }
       }
     }
@@ -144,6 +152,7 @@ export default class PathfindingVisualizer extends Component {
     const {nodes} = this.state;
     return (
       <div>
+        <button onClick={this.startPathFinding}>Start</button>
         <div className="grid">
           {nodes.map((row, rowIndex) => {
             return (
@@ -155,10 +164,11 @@ export default class PathfindingVisualizer extends Component {
   
                   row={node.row}
                   col={node.col}
-                  style={this.styleNode(node.row, node.col)}
+                  style={this.styleNode(node.col, node.row)}
                   explored={node.explored}
+                  isPath={node.isPath}
                   key={node.key}
-                  type={this.setUniqueNodeType(node.row, node.col)}
+                  type={this.setUniqueNodeType(node.col, node.row)}
                 />)}
               </div>
             )
