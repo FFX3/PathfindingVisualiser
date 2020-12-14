@@ -23,6 +23,7 @@ export default class PathfindingVisualizer extends Component {
     };
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this);
     this.startPathFinding = this.startPathFinding.bind(this);
+    this.drawPath = this.drawPath.bind(this);
   }
 
   //path finding implementation
@@ -48,7 +49,6 @@ export default class PathfindingVisualizer extends Component {
     let debug = 0;
 
     while(queue.length>0){
-      console.log(nodeGrid)
       currentNodePos = queue.pop()
 
       let neighbours = dijkstra.FindNeighbours(nodeGrid, currentNodePos);
@@ -66,15 +66,24 @@ export default class PathfindingVisualizer extends Component {
         //end function return path
         let path = dijkstra.CrawlPath(nodeGrid, end);
         console.log(path)
+        this.drawPath(path)
         return path
       }
       if(dijkstra.GCost(nodeGrid, queue[queue.length-1]) === Infinity){
         break;
       }
-      debug += 1
     }
     console.log('No path found')
     return null
+  }
+
+  drawPath(pathArr){
+    console.log(pathArr)
+    if(pathArr !== null){
+      Array.prototype.forEach.call(pathArr, (position) => {
+        this.nodeTypeHandler('path', position)
+      })
+    }
   }
 
   nodeTypeHandler(type, position){
@@ -103,6 +112,7 @@ export default class PathfindingVisualizer extends Component {
 
         break;
       case 'wall':
+      case 'path':
         newNodeProps.type = [type];
         break;
       case 'erase':
@@ -167,6 +177,12 @@ export default class PathfindingVisualizer extends Component {
         style = {
           ...style,
           backgroundColor: '#ADD8E6'
+        }
+      }
+      if(type.includes('path')){
+        style = {
+          ...style,
+          backgroundColor: 'green',
         }
       }
     }
