@@ -4,8 +4,7 @@ import Node from './Node/Node';
 import './PathfindingVisualizer.css'
 
 //algorithms
-import aStar from './algorithms/a*';
-import dijkstra from './algorithms/dijkstra';
+import * as dijkstra from './algorithms/dijkstra';
 
 //variables
 let rows = 15;
@@ -40,7 +39,42 @@ export default class PathfindingVisualizer extends Component {
         }
       })
     })
-    dijkstra(start, end, grid, {}, true);
+    let nodeGrid = dijkstra.CreateNodeGridFromBoolGrid(grid, start);
+    let queue = dijkstra.CreatExplorationQueue(nodeGrid, start);
+    let currentNodePos = start
+
+    //loop starts here
+
+    let debug = 0;
+
+    while(queue.length>0){
+      console.log(nodeGrid)
+      currentNodePos = queue.pop()
+
+      let neighbours = dijkstra.FindNeighbours(nodeGrid, currentNodePos);
+      neighbours.forEach((neighbour) => {
+        if(dijkstra.GCost(nodeGrid, currentNodePos) + dijkstra.CalculateDistance(currentNodePos, neighbour) < dijkstra.GCost(nodeGrid, neighbour)){
+          nodeGrid = dijkstra.ChangeGCost(nodeGrid, neighbour, dijkstra.GCost(nodeGrid, currentNodePos) + dijkstra.CalculateDistance(currentNodePos, neighbour))
+          nodeGrid = dijkstra.ChangePrev(nodeGrid, neighbour, currentNodePos)
+
+          queue = dijkstra.UpdateExplorationQueue(nodeGrid, neighbour, queue)
+        }
+      })
+      if(dijkstra.isNextToEnd(currentNodePos, end)){
+        console.log(`path found! path G-Cost is ${dijkstra.GCost(nodeGrid, end)}`)
+        console.log(nodeGrid)
+        //end function return path
+        let path = dijkstra.CrawlPath(nodeGrid, end);
+        console.log(path)
+        return path
+      }
+      if(dijkstra.GCost(nodeGrid, queue[queue.length-1]) === Infinity){
+        break;
+      }
+      debug += 1
+    }
+    console.log('No path found')
+    return null
   }
 
   nodeTypeHandler(type, position){

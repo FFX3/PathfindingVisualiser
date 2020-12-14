@@ -1,168 +1,178 @@
-//I'm using linked list to keep track of which nodes were used to get to the current node to calculate the G-cost
-class PathNode {
-  constructor(x, y, prev, gCost) {
-    this.data = {
-      position: {
-        x:x,
-        y:y,
-      },
-      neighbours: [],
-      gCost: gCost
-    };
-    this.prev = prev;           
-  }
+
+const CreateNode = (position, gCost) => {
+  let node = {
+    position:{x:position.x, y:position.y},
+    gCost:gCost,
+    prev: null,
+    explored:false,
+  } 
+  return node
 }
 
-const dijkstra = (start, end, grid, nodesList, init) => {
-  let nodes = nodesList
-
-  //if first iteration
-  if(init){
-    nodes.start = start;
-    nodes.end = end;
-    nodes.nodeListGCost = grid; // this creates a new set of nested arrays with the proper dimensions, I'll use this to keep track of gCost
-    nodes.nodeListGCost[start.y][start.x] = 0;
-    nodes.explored = []
-    nodes.queue = []
-    nodes.queue.push(new PathNode(start.x, start.y, null, 0));
-    nodes.pathFound = false;
-    nodes.pathHead = null; //the path will be returned as a linked list
-  }
-
-  nodes.currentNode = nodes.queue.pop();
-
-  nodes.explored.push(nodes.currentNode.data.position);
-  //step 1 assign neighbours new GCost
-  nodes.currentNode.data.neighbours = findNeighbours(nodes.currentNode.data.position, grid);
-  nodes.currentNode.data.neighbours.forEach(position=>{
-    let distanceFromThisNode;
-    if(nodes.currentNode.data.position.x !== position.x && nodes.currentNode.data.position.y !== position.y){//then this is a diagonal
-      distanceFromThisNode = Math.sqrt(2);
-    }else{
-      distanceFromThisNode = 1;
-    }
-    if(nodes.nodeListGCost[position.y][position.x] === true || nodes.nodeListGCost[position.y][position.x] === false){
-      nodes.nodeListGCost[position.y][position.x] = nodes.currentNode.data.gCost + distanceFromThisNode;
-    }
-    else{
-      if(nodes.currentNode.data.gCost + distanceFromThisNode < nodes.nodeListGCost[position.y][position.x]){
-        nodes.nodeListGCost[position.y][position.x] = nodes.currentNode.data.gCost + distanceFromThisNode;
-      }
-    }
-  });
-
-  //step 2 initiate the new nodes and order them based on gCost in the queue
-  nodes.currentNode.data.neighbours.forEach(position=>{
-    let newNode = new PathNode(position.x, position.y, nodes.currentNode, nodes.nodeListGCost[position.y][position.x]);
-    if(nodes.queue.length === 0){
-      nodes.queue.push(newNode);
-    }else{
-
-      for(let index = nodes.queue.length-1; index>=0; index--){
-        if(newNode.data.gCost < nodes.queue[index].gCost){
-          //add this node right after it
-          nodes.queue.splice(index+1, 0, newNode);
-        }else if(index === 0){
-          //this is this node is has the highest gCost and should be the first in the array
-          nodes.queue.unshift(newNode);
+const CreateNodeGridFromBoolGrid = (grid, start) => {
+  let nodeGrid = grid;
+  for(let y = 0; y < grid.length; y++){
+    for(let x = 0; x < grid[y].length; x++){
+      if(nodeGrid[y][x]){ // this is not a wall
+        if(x === start.x && y === start.y){
+          //this is the starting node and therefore has a gCost of 0
+          nodeGrid[y][x] = CreateNode({x:x, y:y}, 0);
+        }else{
+          //this is not the starting node and therefor has an infinite gCost
+          nodeGrid[y][x] = CreateNode({x:x, y:y}, Infinity);
         }
+      }else{//this position is supposed to be a wall
+        nodeGrid[y][x] = 'wall';
       }
     }
-  })
+  }
+  return nodeGrid;
+}
 
-  //step 3 check if any of the nodes are the end node, that would mean we're done and can return the end node as the pathHead
-  nodes.queue.forEach(node=>{
-    console.log(node.data.position);
-    console.log(end);
-    if(node.data.position.x === end.x && node.data.position.y === end.y){
-      nodes.pathHead = node;
-      nodes.pathFound = true;
+const CreatExplorationQueue = (nodeGrid, start) => { //the exploration queue is an array of positions ordered by the gCost of the node they each respectivly point to. if the last index points a node with the gCost of infinity then this means no path can be found
+  let queue = [start]
+  
+  for(let y = 0; y < nodeGrid.length; y++){
+    for(let x = 0; x < nodeGrid[y].length; x++){
+      if(!(x === start.x && y === start.y) && !(nodeGrid[y][x] === 'wall')){//skip this position if it's the start (we already added it) or if it's a wall
+        queue.push({x:x, y:y});
+      }
+    }
+  }
+  return queue.reverse();
+}
+
+const GCost = (nodeGrid, position) => {
+  if(nodeGrid[position.y][position.x] !== 'wall' && nodeGrid[position.y][position.x] !== undefined){
+    return nodeGrid[position.y][position.x].gCost;
+  }else{
+    return undefined;
+  }
+}
+
+const ChangeGCost = (nodeGrid, position, gCost) => {
+  if(nodeGrid[position.y][position.x] !== 'wall' && nodeGrid[position.y][position.x] !== undefined){
+    nodeGrid[position.y][position.x].gCost = gCost;
+  }
+  return nodeGrid
+}
+
+const UpdateExplorationQueue = (nodeGrid, position, queue) => {
+  queue = queue.reverse()
+  if(nodeGrid[position.y][position.x] === 'wall'){
+    return undefined
+  }
+
+  let gCost = GCost(nodeGrid, position)
+
+  queue = queue.filter((pos)=>{
+    if(pos.x === position.x && pos.y === position.y){
+      return false
+    }else{
+      return true
     }
   })
 
-
-
-  console.log(nodes);
-
-  return nodes;
+  for(let i=0; i<queue.length; i++){
+    if(gCost <= GCost(nodeGrid, queue[i])){
+      queue.splice(i, 0, position)
+      return queue.reverse();
+    }
+  }
+  queue.push(position)
+  return queue.reverse()
 }
 
-//utilites
-const findNeighbours = (position, grid) => {
-  let neighbours = [];
-
-  //bools to save from checking again when we start looking for diagonal neighbours
-  let right = false;
-  let left = false;
-  let down = false;
-  let up = false;
-
-  //right
-  if(!(position.x + 1 >= grid[position.y].length)){ //check if this position is on the grid
-    if(grid[position.y][position.x+1]){neighbours.push({
-      x: position.x+1,
-      y: position.y,
-    });}
-    right = true;
+const Prev = (nodeGrid, position) => {
+  if(nodeGrid[position.y][position.x] !== 'wall' && nodeGrid[position.y][position.x] !== undefined){
+    return nodeGrid[position.y][position.x].prev;
+  }else{
+    return undefined;
   }
-  //left
+}
+
+const ChangePrev = (nodeGrid, position, prev) => {
+  if(nodeGrid[position.y][position.x] !== 'wall' && nodeGrid[position.y][position.x] !== undefined){
+    nodeGrid[position.y][position.x].prev = prev;
+  }
+  return nodeGrid
+}
+
+const FindNeighbours = (nodeGrid, position) => {
+  let neighbours = []
+  let left = false
+  let right = false
+  let up = false
+  let down = false
+
+  if(!(position.y -1 < 0)){
+    up = true
+    neighbours.push({x:position.x, y:position.y-1})
+  }
+  if(position.y + 1 < nodeGrid.length){
+    down = true
+    neighbours.push({x:position.x, y:position.y+1})
+  }
   if(!(position.x - 1 < 0)){
-    if(grid[position.y][position.x-1]){neighbours.push({
-      x: position.x-1,
-      y: position.y,
-    });}
-    left = true;
+    left = true
+    neighbours.push({x:position.x-1, y:position.y})
   }
-  //down
-  if(!(position.y + 1 >= grid.length)){
-    if(grid[position.y+1][position.x]){neighbours.push({
-      x: position.x,
-      y: position.y+1,
-    });}
-    down = true;
-  }//up
-  if(!(position.y - 1 < 0)){
-    if(grid[position.y-1][position.x]){neighbours.push({
-      x: position.x,
-      y: position.y-1,
-    });}
-    up = true;
+  if(position.x + 1 < nodeGrid[position.y].length){
+    right = true
+    neighbours.push({x:position.x+1, y:position.y})
   }
 
-  //find diagonal neighbours
-  if(left){
-    if(down){
-      if(grid[position.y+1][position.x-1]){neighbours.push({
-        x:position.x-1,
-        y:position.y+1,
-      })}
+  //diagonals
+  if(up){
+    if(left){
+      neighbours.push({x:position.x-1, y:position.y-1})
     }
-    if(up){
-      if(grid[position.y-1][position.x-1]){neighbours.push({
-        x:position.x-1,
-        y:position.y-1,
-      })}
+    if(right){
+      neighbours.push({x:position.x+1, y:position.y-1})
     }
   }
-  if(right){
-    if(down){
-      if(grid[position.y+1][position.x+1]){neighbours.push({
-        x:position.x+1,
-        y:position.y+1,
-      })}
+  if(down){
+    if(left){
+      neighbours.push({x:position.x-1, y:position.y+1})
     }
-    if(up){
-      if(grid[position.y-1][position.x+1]){neighbours.push({
-        x:position.x+1,
-        y:position.y-1,
-      })}
+    if(right){
+      neighbours.push({x:position.x+1, y:position.y+1})
     }
   }
 
-
-  //remove walls from neighbours
-   
-  return neighbours;
+  //clean walls from neighbor list
+  neighbours = neighbours.filter((position) =>{
+    if(nodeGrid[position.y][position.x] === 'wall'){
+      return false
+    }else{
+      return true
+    }
+  })
+  return neighbours
 }
 
-export default dijkstra;
+const isNextToEnd = (position, end) => {
+  let distanceFromEnd = CalculateDistance(position, end)
+  if(distanceFromEnd <= Math.SQRT2){
+    return true
+  }else{
+    return false
+  }
+}
+
+const CalculateDistance = (position1, position2) => {
+  return Math.sqrt((position1.x-position2.x)**2 + (position1.y-position2.y)**2)
+}
+
+const CrawlPath = (nodeGrid, head) => {//returns an array of nodes in the path ordered from last to first
+  let curPos = head
+  let path = []
+
+  while(curPos !== null){
+    path.push(curPos)
+    curPos = nodeGrid[curPos.y][curPos.x].prev
+  }
+  return path
+}
+
+export {CreateNodeGridFromBoolGrid, CreatExplorationQueue, GCost, ChangeGCost, Prev, ChangePrev, FindNeighbours, isNextToEnd, UpdateExplorationQueue, CalculateDistance, CrawlPath};
