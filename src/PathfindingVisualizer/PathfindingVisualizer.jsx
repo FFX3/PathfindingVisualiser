@@ -43,13 +43,19 @@ export default class PathfindingVisualizer extends Component {
     let nodeGrid = dijkstra.CreateNodeGridFromBoolGrid(grid, start);
     let queue = dijkstra.CreatExplorationQueue(nodeGrid, start);
     let currentNodePos = start
+    let loopCount = 0
 
     //loop starts here
-
-    let debug = 0;
-
     while(queue.length>0){
       currentNodePos = queue.pop()
+
+      //tracking the loop count to add the proper delay to rendering
+      loopCount += 1
+
+      // this changes the color of the nodes
+      setTimeout((curPos)=>{
+        this.nodeTypeHandler('explored', curPos)
+      },1000*loopCount, currentNodePos)
 
       let neighbours = dijkstra.FindNeighbours(nodeGrid, currentNodePos);
       neighbours.forEach((neighbour) => {
@@ -66,7 +72,9 @@ export default class PathfindingVisualizer extends Component {
         //end function return path
         let path = dijkstra.CrawlPath(nodeGrid, end);
         console.log(path)
-        this.drawPath(path)
+        setTimeout((path)=>{
+          this.drawPath(path)
+        },1000*loopCount, path)
         return path
       }
       if(dijkstra.GCost(nodeGrid, queue[queue.length-1]) === Infinity){
@@ -113,6 +121,7 @@ export default class PathfindingVisualizer extends Component {
         break;
       case 'wall':
       case 'path':
+      case 'explored':
         newNodeProps.type = [type];
         break;
       case 'erase':
@@ -176,7 +185,7 @@ export default class PathfindingVisualizer extends Component {
       if(type.includes('explored')){
         style = {
           ...style,
-          backgroundColor: '#ADD8E6'
+          backgroundColor: '#00FFFF'
         }
       }
       if(type.includes('path')){
