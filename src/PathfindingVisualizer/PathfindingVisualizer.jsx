@@ -20,14 +20,16 @@ export default class PathfindingVisualizer extends Component {
       nodes: [],
       startPosition: {},
       endPosition: {},
+      timeOutIDs: [],
     };
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this);
     this.startPathFinding = this.startPathFinding.bind(this);
     this.drawPath = this.drawPath.bind(this);
+    this.resetGrid = this.resetGrid.bind(this);
   }
 
   //path finding implementation
-  startPathFinding(){
+  startPathFinding(delay){
     const start = this.state.startPosition;
     const end = this.state.endPosition;
     //creates a grid of bools true for walkable terrain and false for the walls
@@ -45,6 +47,7 @@ export default class PathfindingVisualizer extends Component {
     let currentNodePos = start
     let loopCount = 0
 
+
     //loop starts here
     while(queue.length>0){
       currentNodePos = queue.pop()
@@ -53,9 +56,16 @@ export default class PathfindingVisualizer extends Component {
       loopCount += 1
 
       // this changes the color of the nodes
-      setTimeout((curPos)=>{
-        this.nodeTypeHandler('explored', curPos)
-      },1000*loopCount, currentNodePos)
+      if(delay>0){
+        let timeoutID = setTimeout((curPos)=>{
+          this.nodeTypeHandler('explored', curPos)
+        },delay*loopCount, currentNodePos)
+        this.setState(prevState => ({
+          timeOutIDs:[...prevState.timeOutIDs, timeoutID]
+        }))
+      }else{
+        this.nodeTypeHandler('explored', currentNodePos)
+      }
 
       let neighbours = dijkstra.FindNeighbours(nodeGrid, currentNodePos);
       neighbours.forEach((neighbour) => {
@@ -72,9 +82,19 @@ export default class PathfindingVisualizer extends Component {
         //end function return path
         let path = dijkstra.CrawlPath(nodeGrid, end);
         console.log(path)
-        setTimeout((path)=>{
+
+        if(delay > 0){
+          let timeoutID = setTimeout((path)=>{
+            this.drawPath(path)
+          },delay*loopCount, path)
+          this.setState(prevState => ({
+            timeOutIDs:[...prevState.timeOutIDs, timeoutID]
+          }))
+        }else{
           this.drawPath(path)
-        },1000*loopCount, path)
+        }
+
+
         return path
       }
       if(dijkstra.GCost(nodeGrid, queue[queue.length-1]) === Infinity){
@@ -160,6 +180,20 @@ export default class PathfindingVisualizer extends Component {
     this.setState({nodes});
   }
 
+  resetGrid(){ //clean grid types while preserving the 'walls' this will be called right before a solve starts to make sure the solve is not affected by previous solves
+    this.state.timeOutIDs.forEach((ID)=>{
+      clearTimeout(ID)
+    })  
+
+    this.state.nodes.forEach((row)=>{
+      row.forEach((node)=>{
+        if(!(node.type.includes('start') || node.type.includes('end') || node.type.includes('wall'))){
+          this.nodeTypeHandler('erase', {x:node.col, y:node.row})
+        }
+      })
+    })
+  }
+
   //this logic should probably be in the Node components
   styleNode(x, y){
     let style;
@@ -211,7 +245,14 @@ export default class PathfindingVisualizer extends Component {
     const {nodes} = this.state;
     return (
       <div>
-        <button onClick={this.startPathFinding}>Start</button>
+        <button onClick={()=>{
+            this.resetGrid() 
+            this.startPathFinding(300)}
+          }>Solve</button>
+        <button onClick={()=>{
+            this.resetGrid() 
+            this.startPathFinding(0)}
+          }>Instant Solve</button>
         <div className="grid">
           {nodes.map((row, rowIndex) => {
             return (
