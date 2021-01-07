@@ -21,11 +21,13 @@ export default class PathfindingVisualizer extends Component {
       startPosition: {},
       endPosition: {},
       timeOutIDs: [],
+      isMouseDown: false,
     };
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this);
     this.startPathFinding = this.startPathFinding.bind(this);
     this.drawPath = this.drawPath.bind(this);
     this.resetGrid = this.resetGrid.bind(this);
+    this.toggleMouseState = this.toggleMouseState.bind(this);
   }
 
   //path finding implementation
@@ -241,6 +243,11 @@ export default class PathfindingVisualizer extends Component {
     }
   }
 
+  //toggle mouse state takes true or false as an argument
+  toggleMouseState(b){
+    this.setState({isMouseDown: b})
+  }
+
   render() {
     const {nodes} = this.state;
     return (
@@ -261,6 +268,8 @@ export default class PathfindingVisualizer extends Component {
                 <Node
                   nodeTypeHandler={this.nodeTypeHandler}
                   wandType={this.props.wandType}
+                  toggleMouseState={this.toggleMouseState}
+                  isMouseDown={this.state.isMouseDown}
   
                   row={node.row}
                   col={node.col}
