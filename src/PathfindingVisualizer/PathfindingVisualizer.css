@@ -4,7 +4,7 @@
   border-top:0px;
   border-left:0px;
   border-style: solid;
-
+  width: 500px;
   margin: 20px;
 }
 
@@ -17,7 +17,7 @@
 }
 
 .node {
-  flex-grow: 1;
+  width: 20px;
   border-top:1px;
   border-left:1px;
   border-right: 0px;

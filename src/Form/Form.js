@@ -8,12 +8,10 @@ const Form = ({wandManager}) => {
 
   return(
     <form>
-      <select onChange={selectHandler}>
-        <option value="start">Start</option>
-        <option value="end">End</option>
-        <option value="wall">Wall</option>
-        <option value="erase">Erase</option>
-      </select>
+        <label>Start</label><input onClick={()=>{wandManager('start')}} type='radio' name='wandType' value='start'></input>    
+        <label>End</label><input onClick={()=>{wandManager('end')}} type='radio' name='wandType' value='end'></input>
+        <label>Wall</label><input onClick={()=>{wandManager('wall')}} type='radio' name='wandType' value='wall'></input>    
+        <label>Erase</label><input onClick={()=>{wandManager('erase')}} type='radio' name='wandType' value='erase'></input>
     </form>
   )
 }

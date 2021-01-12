@@ -18,8 +18,8 @@ export default class PathfindingVisualizer extends Component {
     super(props);
     this.state = {
       nodes: [],
-      startPosition: {},
-      endPosition: {},
+      startPosition: {x:4,y:7},
+      endPosition: {x:20,y:7},
       timeOutIDs: [],
       isMouseDown: false,
     };
@@ -182,18 +182,28 @@ export default class PathfindingVisualizer extends Component {
     this.setState({nodes});
   }
 
-  resetGrid(){ //clean grid types while preserving the 'walls' this will be called right before a solve starts to make sure the solve is not affected by previous solves
+  resetGrid(bClearWall){ //clean grid types while preserving the 'walls' this will be called right before a solve starts to make sure the solve is not affected by previous solves
     this.state.timeOutIDs.forEach((ID)=>{
       clearTimeout(ID)
-    })  
-
-    this.state.nodes.forEach((row)=>{
-      row.forEach((node)=>{
-        if(!(node.type.includes('start') || node.type.includes('end') || node.type.includes('wall'))){
-          this.nodeTypeHandler('erase', {x:node.col, y:node.row})
-        }
-      })
     })
+
+    if(bClearWall){
+      this.state.nodes.forEach((row)=>{
+        row.forEach((node)=>{
+          if(!(node.type.includes('start') || node.type.includes('end'))){
+            this.nodeTypeHandler('erase', {x:node.col, y:node.row})
+          }
+        })
+      })
+    }else{
+      this.state.nodes.forEach((row)=>{
+        row.forEach((node)=>{
+          if(!(node.type.includes('start') || node.type.includes('end') || node.type.includes('wall'))){
+            this.nodeTypeHandler('erase', {x:node.col, y:node.row})
+          }
+        })
+      })
+    }
   }
 
   //this logic should probably be in the Node components
@@ -203,31 +213,31 @@ export default class PathfindingVisualizer extends Component {
     if(x === this.state.startPosition.x && y === this.state.startPosition.y) {
       style = {
         ...style,
-        backgroundColor: 'red',
+        backgroundColor: '#FF8B00',
       }
     }else if(x === this.state.endPosition.x && y === this.state.endPosition.y){
       style = {
         ...style,
-        backgroundColor: 'blue',
+        backgroundColor: '#C4FD00',
       }
     }else{
       const type = this.state.nodes[y][x].type;
       if(type.includes('wall')){
         style = {
           ...style,
-          backgroundColor: 'grey',
+          backgroundColor: 'Black',
         }
       }
       if(type.includes('explored')){
         style = {
           ...style,
-          backgroundColor: '#00FFFF'
+          backgroundColor: '#99D5F5'
         }
       }
       if(type.includes('path')){
         style = {
           ...style,
-          backgroundColor: 'green',
+          backgroundColor: '#F300C5',
         }
       }
     }
@@ -253,13 +263,17 @@ export default class PathfindingVisualizer extends Component {
     return (
       <div>
         <button onClick={()=>{
-            this.resetGrid() 
-            this.startPathFinding(300)}
-          }>Solve</button>
+            this.resetGrid(false) 
+            this.startPathFinding(150)
+            }}>Solve</button>
         <button onClick={()=>{
-            this.resetGrid() 
-            this.startPathFinding(0)}
-          }>Instant Solve</button>
+            this.resetGrid(false) 
+            this.startPathFinding(0)
+          }}>Instant Solve</button>
+        <button onClick={()=>{
+            this.resetGrid(true)
+          }}>Clear Grid</button>
+        
         <div className="grid">
           {nodes.map((row, rowIndex) => {
             return (
