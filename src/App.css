@@ -5,3 +5,18 @@
   -o-user-select: none;
   user-select: none;
 }
+.inputs {
+  margin: 5px auto;
+  text-align: center;
+}
+
+.inputs button{
+  margin: 5px;
+}
+.inputs label{
+  margin-left: 10px
+}
+.inputs input{
+  margin: 5px;
+  margin-right: 10px;
+}

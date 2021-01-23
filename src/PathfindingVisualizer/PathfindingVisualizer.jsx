@@ -262,18 +262,20 @@ export default class PathfindingVisualizer extends Component {
     const {nodes} = this.state;
     return (
       <div>
-        <button onClick={()=>{
-            this.resetGrid(false) 
-            this.startPathFinding(150)
-            }}>Solve</button>
-        <button onClick={()=>{
-            this.resetGrid(false) 
-            this.startPathFinding(0)
-          }}>Instant Solve</button>
-        <button onClick={()=>{
-            this.resetGrid(true)
-          }}>Clear Grid</button>
-        
+        <div className="inputs">
+          <button onClick={()=>{
+              this.resetGrid(false) 
+              this.startPathFinding(150)
+              }}>Solve</button>
+          <button onClick={()=>{
+              this.resetGrid(false) 
+              this.startPathFinding(0)
+            }}>Instant Solve</button>
+          <button onClick={()=>{
+              this.resetGrid(true)
+            }}>Clear Grid</button>
+          
+        </div>
         <div className="grid">
           {nodes.map((row, rowIndex) => {
             return (

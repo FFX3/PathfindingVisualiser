@@ -7,7 +7,7 @@ const Form = ({wandManager}) => {
   }
 
   return(
-    <form>
+    <form className="inputs">
         <label>Start</label><input onClick={()=>{wandManager('start')}} type='radio' name='wandType' value='start'></input>    
         <label>End</label><input onClick={()=>{wandManager('end')}} type='radio' name='wandType' value='end'></input>
         <label>Wall</label><input onClick={()=>{wandManager('wall')}} type='radio' name='wandType' value='wall'></input>    
