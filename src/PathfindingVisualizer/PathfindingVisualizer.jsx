@@ -142,6 +142,11 @@ export default class PathfindingVisualizer extends Component {
 
         break;
       case 'wall':
+        //check if this node is the start or end, in that case don't add wall to it's type
+        if((position.x !== this.state.startPosition.x || position.y !== this.state.startPosition.y) && (position.x !== this.state.endPosition.x || position.y !== this.state.endPosition.y)){
+          newNodeProps.type = [type]
+        }
+        break;
       case 'path':
       case 'explored':
         newNodeProps.type = [type];
