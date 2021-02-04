@@ -103,7 +103,7 @@ export default class PathfindingVisualizer extends Component {
         break;
       }
     }
-    console.log('No path found')
+    alert('No path found')
     return null
   }
 
