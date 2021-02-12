@@ -22,6 +22,7 @@ export default class PathfindingVisualizer extends Component {
       endPosition: {x:20,y:7},
       timeOutIDs: [],
       isMouseDown: false,
+      isPathDrawn: false,
     };
     this.nodeTypeHandler = this.nodeTypeHandler.bind(this);
     this.startPathFinding = this.startPathFinding.bind(this);
@@ -108,6 +109,7 @@ export default class PathfindingVisualizer extends Component {
   }
 
   drawPath(pathArr){
+    this.setState({isPathDrawn:true})
     console.log(pathArr)
     if(pathArr !== null){
       Array.prototype.forEach.call(pathArr, (position) => {
@@ -119,10 +121,11 @@ export default class PathfindingVisualizer extends Component {
   nodeTypeHandler(type, position){
     let newNodeProps = {}
     let nodes = this.state.nodes;
+    let mazeChanged = false;
     switch(type){
       case 'start':
       case 'end':
-
+        mazeChanged = true
         if(type === 'start'){
           this.setState({
             startPosition: {
@@ -164,7 +167,17 @@ export default class PathfindingVisualizer extends Component {
       ...newNodeProps,
     }
     nodes[position.y][position.x] = node;
-    this.setState({nodes})
+    if(mazeChanged){
+      this.setState({nodes}, this.updatePathfinding)
+    }else{
+      this.setState({nodes})
+    }
+  }
+  updatePathfinding(){
+    if(this.state.isPathDrawn === true){
+      this.resetGrid(false) 
+      this.startPathFinding(0)
+    }
   }
 
   componentDidMount() {
@@ -278,6 +291,7 @@ export default class PathfindingVisualizer extends Component {
             }}>Instant Solve</button>
           <button onClick={()=>{
               this.resetGrid(true)
+              this.setState({isPathDrawn:false})
             }}>Clear Grid</button>
           
         </div>
